@@ -174,6 +174,19 @@ export default function AuthForm({ type }: AuthFormProps) {
             >
               {loginForm.formState.isSubmitting ? "Signing in..." : "Sign In"}
             </Button>
+            
+            <div className="flex justify-between mt-2 text-sm">
+              <Link href={ROUTES.FORGOT_USERNAME}>
+                <span className="text-primary hover:underline font-medium cursor-pointer">
+                  Forgot Username?
+                </span>
+              </Link>
+              <Link href={ROUTES.FORGOT_PASSWORD}>
+                <span className="text-primary hover:underline font-medium cursor-pointer">
+                  Forgot Password?
+                </span>
+              </Link>
+            </div>
           </form>
         </Form>
       ) : (

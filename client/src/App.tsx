@@ -19,13 +19,18 @@ import Matches from "@/pages/matches";
 import Messages from "@/pages/messages";
 import Conversation from "@/pages/conversation";
 import ProfilePage from "@/pages/profile";
+import ForgotPassword from "@/pages/forgot-password";
+import ForgotUsername from "@/pages/forgot-username";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   const [location] = useLocation();
   
   // Check if we're on a page that doesn't need the header/footer
-  const isAuthPage = location === ROUTES.LOGIN || location === ROUTES.REGISTER;
+  const isAuthPage = location === ROUTES.LOGIN || 
+                    location === ROUTES.REGISTER || 
+                    location === ROUTES.FORGOT_PASSWORD || 
+                    location === ROUTES.FORGOT_USERNAME;
   const isFullPage = location.startsWith('/discover') || 
                      location.startsWith('/messages') || 
                      location === ROUTES.HOME;
@@ -33,7 +38,9 @@ function Router() {
   // Check if we're on a page that needs the mobile nav
   const needsMobileNav = location !== ROUTES.HOME &&
                         location !== ROUTES.LOGIN && 
-                        location !== ROUTES.REGISTER;
+                        location !== ROUTES.REGISTER &&
+                        location !== ROUTES.FORGOT_PASSWORD &&
+                        location !== ROUTES.FORGOT_USERNAME;
   
   return (
     <div className="min-h-screen flex flex-col">

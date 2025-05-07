@@ -5,6 +5,9 @@ export const API_ENDPOINTS = {
     LOGIN: '/api/auth/login',
     LOGOUT: '/api/auth/logout',
     ME: '/api/auth/me',
+    FORGOT_PASSWORD: '/api/auth/forgot-password',
+    RESET_PASSWORD: '/api/auth/reset-password',
+    FORGOT_USERNAME: '/api/auth/forgot-username',
   },
   PROFILE: {
     GET: '/api/profile',
@@ -131,4 +134,6 @@ export const ROUTES = {
   MESSAGES: "/messages",
   CONVERSATION: "/conversation/:matchId",
   PROFILE: "/profile",
+  FORGOT_PASSWORD: "/forgot-password",
+  FORGOT_USERNAME: "/forgot-username",
 };

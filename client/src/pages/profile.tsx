@@ -27,14 +27,17 @@ export default function ProfilePage() {
   
   // Fetch profile
   const { 
-    data: profile, 
+    data: profileData, 
     isLoading,
     isError,
     error
-  } = useQuery<ProfileType>({
+  } = useQuery<ProfileType | null>({
     queryKey: [API_ENDPOINTS.PROFILE.GET],
     enabled: isAuthenticated,
   });
+  
+  // Convert undefined to null for proper typing
+  const profile = profileData === undefined ? null : profileData;
   
   // Get initials for avatar fallback
   const getInitials = (name?: string) => {

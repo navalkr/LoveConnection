@@ -3,9 +3,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Profile, InsertProfile } from "@shared/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { API_ENDPOINTS, INTERESTS } from "@/lib/constants";
+import { API_ENDPOINTS, INTERESTS, PROFESSIONS, COUNTRIES } from "@/lib/constants";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { MapPin } from "lucide-react";
 
 import {
   Form,
@@ -19,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import InterestBadge from "@/components/profile/InterestBadge";
 
 interface ProfileFormProps {
@@ -149,20 +151,136 @@ export default function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
           )}
         />
         
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Location</h3>
+          
+          <div className="flex gap-4">
+            <div className="flex items-start">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="icon" 
+                className="mr-2"
+                onClick={() => {
+                  // Implement location detection
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (position) => {
+                        // Store coordinates
+                        const coords = `${position.coords.latitude},${position.coords.longitude}`;
+                        form.setValue("coordinates", coords, { shouldValidate: true });
+                        
+                        // You would normally use these coordinates to fetch location details
+                        // from a geocoding API, but for now we'll just store them
+                        toast({
+                          title: "Location detected",
+                          description: "We've saved your coordinates. Please complete your location details.",
+                        });
+                      },
+                      (error) => {
+                        toast({
+                          title: "Error detecting location",
+                          description: "Please enter your location manually.",
+                          variant: "destructive",
+                        });
+                      }
+                    );
+                  } else {
+                    toast({
+                      title: "Geolocation not supported",
+                      description: "Your browser doesn't support geolocation. Please enter your location manually.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                <MapPin className="h-4 w-4" />
+              </Button>
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Country</FormLabel>
+                    <Select 
+                      value={field.value} 
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your country" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {COUNTRIES.map((country) => (
+                          <SelectItem key={country.value} value={country.value}>
+                            {country.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>City</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your city" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="state"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>State/Province</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your state/province" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+        
         <FormField
           control={form.control}
-          name="location"
+          name="profession"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Location</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="e.g. San Francisco, CA"
-                  {...field}
-                />
-              </FormControl>
+              <FormLabel>Profession</FormLabel>
+              <Select 
+                value={field.value} 
+                onValueChange={field.onChange}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your profession" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {PROFESSIONS.map((profession) => (
+                    <SelectItem key={profession.value} value={profession.value}>
+                      {profession.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormDescription>
-                Enter your city and state/country.
+                Let others know what you do for a living.
               </FormDescription>
               <FormMessage />
             </FormItem>

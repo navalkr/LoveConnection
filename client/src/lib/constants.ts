@@ -71,6 +71,48 @@ export const INTERESTED_IN = [
   { value: "everyone", label: "Everyone" },
 ];
 
+// Popular professions for dropdown
+export const PROFESSIONS = [
+  { value: "software_engineer", label: "Software Engineer" },
+  { value: "doctor", label: "Doctor/Medical Professional" },
+  { value: "teacher", label: "Teacher/Educator" },
+  { value: "artist", label: "Artist/Creative Professional" },
+  { value: "business", label: "Business/Entrepreneur" },
+  { value: "finance", label: "Finance/Banking" },
+  { value: "marketing", label: "Marketing/Advertising" },
+  { value: "legal", label: "Legal Professional" },
+  { value: "engineer", label: "Engineer" },
+  { value: "healthcare", label: "Healthcare Worker" },
+  { value: "retail", label: "Retail/Sales" },
+  { value: "hospitality", label: "Hospitality" },
+  { value: "student", label: "Student" },
+  { value: "scientist", label: "Scientist/Researcher" },
+  { value: "writer", label: "Writer/Journalist" },
+  { value: "architect", label: "Architect/Designer" },
+  { value: "trade", label: "Skilled Trade" },
+  { value: "government", label: "Government/Public Service" },
+  { value: "entertainment", label: "Entertainment Industry" },
+  { value: "other", label: "Other" },
+];
+
+// List of countries for dropdown
+export const COUNTRIES = [
+  { value: "us", label: "United States" },
+  { value: "ca", label: "Canada" },
+  { value: "uk", label: "United Kingdom" },
+  { value: "au", label: "Australia" },
+  { value: "de", label: "Germany" },
+  { value: "fr", label: "France" },
+  { value: "jp", label: "Japan" },
+  { value: "cn", label: "China" },
+  { value: "in", label: "India" },
+  { value: "br", label: "Brazil" },
+  { value: "mx", label: "Mexico" },
+  { value: "za", label: "South Africa" },
+  { value: "sg", label: "Singapore" },
+  { value: "other", label: "Other" },
+];
+
 // Stats for display purposes only
 export const STATS = {
   ACTIVE_USERS: "2M+",

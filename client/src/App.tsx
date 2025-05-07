@@ -56,6 +56,8 @@ function Router() {
           <Route path={ROUTES.MESSAGES} component={Messages} />
           <Route path={ROUTES.CONVERSATION} component={Conversation} />
           <Route path={ROUTES.PROFILE} component={ProfilePage} />
+          <Route path={ROUTES.FORGOT_PASSWORD} component={ForgotPassword} />
+          <Route path={ROUTES.FORGOT_USERNAME} component={ForgotUsername} />
           <Route component={NotFound} />
         </Switch>
       </main>

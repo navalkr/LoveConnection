@@ -274,14 +274,14 @@ export default function ForgotPasswordPage() {
 
         <div className="flex justify-between text-sm">
           <Link href={ROUTES.LOGIN}>
-            <a className="text-primary hover:underline font-medium">
+            <div className="text-primary hover:underline font-medium cursor-pointer">
               Back to Sign In
-            </a>
+            </div>
           </Link>
           <Link href={ROUTES.FORGOT_USERNAME}>
-            <a className="text-primary hover:underline font-medium">
+            <div className="text-primary hover:underline font-medium cursor-pointer">
               Forgot Username?
-            </a>
+            </div>
           </Link>
         </div>
       </div>

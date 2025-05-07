@@ -177,14 +177,14 @@ export default function AuthForm({ type }: AuthFormProps) {
             
             <div className="flex justify-between mt-2 text-sm">
               <Link href={ROUTES.FORGOT_USERNAME}>
-                <span className="text-primary hover:underline font-medium cursor-pointer">
+                <div className="text-primary hover:underline font-medium cursor-pointer">
                   Forgot Username?
-                </span>
+                </div>
               </Link>
               <Link href={ROUTES.FORGOT_PASSWORD}>
-                <span className="text-primary hover:underline font-medium cursor-pointer">
+                <div className="text-primary hover:underline font-medium cursor-pointer">
                   Forgot Password?
-                </span>
+                </div>
               </Link>
             </div>
           </form>
@@ -358,18 +358,18 @@ export default function AuthForm({ type }: AuthFormProps) {
           <p>
             Don't have an account?{" "}
             <Link href={ROUTES.REGISTER}>
-              <a className="text-primary hover:underline font-medium">
+              <div className="text-primary hover:underline font-medium inline">
                 Sign up
-              </a>
+              </div>
             </Link>
           </p>
         ) : (
           <p>
             Already have an account?{" "}
             <Link href={ROUTES.LOGIN}>
-              <a className="text-primary hover:underline font-medium">
+              <div className="text-primary hover:underline font-medium inline">
                 Sign in
-              </a>
+              </div>
             </Link>
           </p>
         )}

@@ -24,6 +24,9 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, data: Partial<InsertUser>): Promise<User | undefined>;
+  updateUserPassword(id: number, password: string): Promise<boolean>;
+  storeResetToken(email: string, token: string, expiry: Date): Promise<boolean>;
+  getUserByResetToken(token: string): Promise<User | undefined>;
   
   // Profile methods
   getProfile(userId: number): Promise<Profile | undefined>;
@@ -60,6 +63,7 @@ export class MemStorage implements IStorage {
   private matches: Map<number, Match>;
   private likes: Map<number, Like>;
   private messages: Map<number, Message>;
+  private resetTokens: Map<string, { email: string, expiry: Date }>;
   
   private userIdCounter: number;
   private profileIdCounter: number;
@@ -73,6 +77,7 @@ export class MemStorage implements IStorage {
     this.matches = new Map();
     this.likes = new Map();
     this.messages = new Map();
+    this.resetTokens = new Map();
     
     this.userIdCounter = 1;
     this.profileIdCounter = 1;
@@ -118,6 +123,38 @@ export class MemStorage implements IStorage {
     const updatedUser: User = { ...user, ...data };
     this.users.set(id, updatedUser);
     return updatedUser;
+  }
+  
+  async updateUserPassword(id: number, password: string): Promise<boolean> {
+    const user = await this.getUser(id);
+    if (!user) return false;
+    
+    user.password = password;
+    this.users.set(id, user);
+    return true;
+  }
+  
+  async storeResetToken(email: string, token: string, expiry: Date): Promise<boolean> {
+    // Store the token with associated email and expiry date
+    this.resetTokens.set(token, { email, expiry });
+    return true;
+  }
+  
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    const tokenData = this.resetTokens.get(token);
+    if (!tokenData) return undefined;
+    
+    // Check if token has expired
+    const now = new Date();
+    if (now > tokenData.expiry) {
+      // Token expired, remove it
+      this.resetTokens.delete(token);
+      return undefined;
+    }
+    
+    // Token is valid, get user by email
+    const user = await this.getUserByEmail(tokenData.email);
+    return user;
   }
   
   // Profile methods

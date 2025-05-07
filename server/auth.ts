@@ -165,18 +165,10 @@ export function setupAuth(storage: IStorage) {
     // Request password reset
     async forgotPassword(req: Request, res: Response) {
       try {
-        const { email } = req.body;
-        if (!email) {
-          return res.status(400).json({ message: "Email is required" });
-        }
+        const { email, phoneNumber } = req.body;
         
-        // Check if user exists
-        const user = await storage.getUserByEmail(email);
-        if (!user) {
-          // For security reasons, don't reveal if the email exists or not
-          return res.status(200).json({ 
-            message: "If the email is registered, a password reset link will be sent" 
-          });
+        if (!email && !phoneNumber) {
+          return res.status(400).json({ message: "Email or phone number is required" });
         }
         
         // Generate reset token with 1 hour expiry
@@ -184,17 +176,50 @@ export function setupAuth(storage: IStorage) {
         const expiry = new Date();
         expiry.setHours(expiry.getHours() + 1);
         
-        // Store token
-        await storage.storeResetToken(email, token, expiry);
-        
-        // In a real application, send an email with the reset token link
-        console.log(`Reset token for ${email}: ${token}`);
-        
-        res.status(200).json({ 
-          message: "If the email is registered, a password reset link will be sent",
-          // For demo purposes, return the token (in production, this would be sent via email)
-          token 
-        });
+        if (email) {
+          // Check if user exists with this email
+          const user = await storage.getUserByEmail(email);
+          if (!user) {
+            // For security reasons, don't reveal if the email exists or not
+            return res.status(200).json({ 
+              message: "If the email is registered, a password reset link will be sent" 
+            });
+          }
+          
+          // Store token for email
+          await storage.storeResetToken(email, token, expiry);
+          
+          // In a real application, send an email with the reset token link
+          console.log(`Reset token for ${email}: ${token}`);
+          
+          return res.status(200).json({ 
+            message: "If the email is registered, a password reset link will be sent",
+            // For demo purposes, return the token (in production, this would be sent via email)
+            token 
+          });
+        } 
+        else if (phoneNumber) {
+          // Check if user exists with this phone number
+          const user = await storage.getUserByPhoneNumber(phoneNumber);
+          if (!user) {
+            // For security reasons, don't reveal if the phone number exists or not
+            return res.status(200).json({ 
+              message: "If the phone number is registered, a password reset code will be sent via SMS" 
+            });
+          }
+          
+          // Store token for phone number
+          await storage.storePhoneResetToken(phoneNumber, token, expiry);
+          
+          // In a real application, send an SMS with the reset token
+          console.log(`Reset token for ${phoneNumber}: ${token}`);
+          
+          return res.status(200).json({ 
+            message: "If the phone number is registered, a password reset code will be sent via SMS",
+            // For demo purposes, return the token (in production, this would be sent via SMS)
+            token 
+          });
+        }
       } catch (error) {
         console.error("Forgot password error:", error);
         res.status(500).json({ message: "Failed to process request" });

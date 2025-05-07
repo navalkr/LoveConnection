@@ -42,6 +42,9 @@ const registerSchema = z.object({
     message: "First name is required",
   }),
   lastName: z.string().optional(),
+  phoneNumber: z.string()
+    .min(10, { message: "Phone number must be at least 10 digits" })
+    .optional(),
   dateOfBirth: z.string().refine((dob) => {
     const date = new Date(dob);
     const today = new Date();
@@ -93,6 +96,7 @@ export default function AuthForm({ type }: AuthFormProps) {
       password: "",
       firstName: "",
       lastName: "",
+      phoneNumber: "",
       dateOfBirth: "",
       gender: "",
       interestedIn: "",
@@ -263,6 +267,27 @@ export default function AuthForm({ type }: AuthFormProps) {
                 )}
               />
             </div>
+            
+            <FormField
+              control={registerForm.control}
+              name="phoneNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number (Optional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="tel" 
+                      placeholder="+1234567890" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Can be used for account recovery
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
             <FormField
               control={registerForm.control}

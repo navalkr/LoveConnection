@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,15 +21,24 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Heart, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Define schema for the form
-const forgotUsernameSchema = z.object({
+// Define schema for the email form
+const emailRecoverySchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address",
   }),
 });
 
-type ForgotUsernameValues = z.infer<typeof forgotUsernameSchema>;
+// Define schema for the phone form
+const phoneRecoverySchema = z.object({
+  phoneNumber: z.string().min(10, {
+    message: "Please enter a valid phone number",
+  }),
+});
+
+type EmailRecoveryValues = z.infer<typeof emailRecoverySchema>;
+type PhoneRecoveryValues = z.infer<typeof phoneRecoverySchema>;
 
 export default function ForgotUsernamePage() {
   const { toast } = useToast();
@@ -36,15 +46,23 @@ export default function ForgotUsernamePage() {
   const [username, setUsername] = useState<string | null>(null);
 
   // Email form
-  const form = useForm<ForgotUsernameValues>({
-    resolver: zodResolver(forgotUsernameSchema),
+  const emailForm = useForm<EmailRecoveryValues>({
+    resolver: zodResolver(emailRecoverySchema),
     defaultValues: {
       email: "",
     },
   });
 
-  // Handle username recovery request
-  const onSubmit = async (data: ForgotUsernameValues) => {
+  // Phone form
+  const phoneForm = useForm<PhoneRecoveryValues>({
+    resolver: zodResolver(phoneRecoverySchema),
+    defaultValues: {
+      phoneNumber: "",
+    },
+  });
+
+  // Handle email recovery request
+  const onEmailSubmit = async (data: EmailRecoveryValues) => {
     try {
       setIsSubmitting(true);
       const response = await apiRequest("POST", "/api/auth/forgot-username", data);
@@ -53,6 +71,33 @@ export default function ForgotUsernamePage() {
       toast({
         title: "Request Processed",
         description: "If the email is registered, your username will be sent to you.",
+      });
+      
+      // For demo purposes, display the username
+      if (result.username) {
+        setUsername(result.username);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to process your request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle phone recovery request
+  const onPhoneSubmit = async (data: PhoneRecoveryValues) => {
+    try {
+      setIsSubmitting(true);
+      const response = await apiRequest("POST", "/api/auth/forgot-username", data);
+      const result = await response.json();
+      
+      toast({
+        title: "Request Processed",
+        description: "If the phone number is registered, your username will be sent via SMS.",
       });
       
       // For demo purposes, display the username
@@ -81,7 +126,7 @@ export default function ForgotUsernamePage() {
             Recover Your Username
           </h2>
           <p className="mt-2 text-sm text-neutral-600">
-            Enter your email to receive your username
+            Recover using your email or phone number
           </p>
         </div>
 
@@ -94,43 +139,98 @@ export default function ForgotUsernamePage() {
           </Alert>
         )}
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="email" 
-                      placeholder="your@email.com" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <Tabs defaultValue="email" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="email">Email</TabsTrigger>
+            <TabsTrigger value="phone">Phone</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="email">
+            <Form {...emailForm}>
+              <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4 pt-4">
+                <FormField
+                  control={emailForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="email" 
+                          placeholder="your@email.com" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter the email address you used when registering
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <Button
-              type="submit"
-              variant="gradient"
-              className="w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Searching...
-                </>
-              ) : (
-                "Recover Username"
-              )}
-            </Button>
-          </form>
-        </Form>
+                <Button
+                  type="submit"
+                  variant="gradient"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    "Recover with Email"
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </TabsContent>
+          
+          <TabsContent value="phone">
+            <Form {...phoneForm}>
+              <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-4 pt-4">
+                <FormField
+                  control={phoneForm.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="tel" 
+                          placeholder="+1234567890" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter the phone number you used when registering
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  variant="gradient"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    "Recover with Phone"
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </TabsContent>
+        </Tabs>
 
         <Separator className="my-4" />
 

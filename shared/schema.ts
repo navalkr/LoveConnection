@@ -21,7 +21,14 @@ export const profiles = pgTable("profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
   bio: text("bio"),
-  location: text("location"),
+  // Replacing single location field with detailed location fields
+  country: text("country"),
+  state: text("state"),
+  city: text("city"),
+  vicinity: text("vicinity"),
+  coordinates: text("coordinates"), // For storing latitude,longitude
+  // Adding profession field
+  profession: text("profession").notNull().default(''), // Making it required
   lastActive: timestamp("last_active"),
   interests: text("interests").array(),
   photos: text("photos").array(),

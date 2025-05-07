@@ -103,10 +103,19 @@ export default function ProfilePage() {
                     <h3 className="text-2xl font-bold font-heading">
                       {user.firstName} {user.lastName || ""}
                     </h3>
-                    {profile?.location && (
+                    {(profile?.city || profile?.state || profile?.country) && (
                       <p className="text-neutral-500 flex items-center">
                         <MapPin className="mr-1" size={16} />
-                        {profile.location}
+                        {[
+                          profile?.city,
+                          profile?.state,
+                          profile?.country
+                        ].filter(Boolean).join(", ")}
+                      </p>
+                    )}
+                    {profile?.profession && (
+                      <p className="text-neutral-500 mt-1">
+                        {profile.profession}
                       </p>
                     )}
                   </div>

@@ -135,7 +135,14 @@ export class MemStorage implements IStorage {
       id, 
       lastActive: now,
       bio: profileData.bio || null,
-      location: profileData.location || null,
+      // Setting all location fields with null defaults
+      country: profileData.country || null,
+      state: profileData.state || null,
+      city: profileData.city || null,
+      vicinity: profileData.vicinity || null,
+      coordinates: profileData.coordinates || null,
+      // Setting profession with empty string default
+      profession: profileData.profession || '',
       interests: profileData.interests || null,
       photos: profileData.photos || null
     };

@@ -31,8 +31,19 @@ const profileFormSchema = z.object({
   bio: z.string().max(500, {
     message: "Bio must be 500 characters or less",
   }),
-  location: z.string().min(1, {
-    message: "Please enter your location",
+  // Location fields
+  country: z.string().min(1, {
+    message: "Please select your country",
+  }),
+  state: z.string().optional(),
+  city: z.string().min(1, {
+    message: "Please enter your city",
+  }),
+  vicinity: z.string().optional(),
+  coordinates: z.string().optional(),
+  // Profession field (required)
+  profession: z.string().min(1, {
+    message: "Please select your profession",
   }),
   interests: z.array(z.string()).min(1, {
     message: "Please select at least one interest",
@@ -52,7 +63,12 @@ export default function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       bio: profile?.bio || "",
-      location: profile?.location || "",
+      country: profile?.country || "",
+      state: profile?.state || "",
+      city: profile?.city || "",
+      vicinity: profile?.vicinity || "",
+      coordinates: profile?.coordinates || "",
+      profession: profile?.profession || "",
       interests: profile?.interests || [],
     },
   });

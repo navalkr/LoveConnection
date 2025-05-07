@@ -22,11 +22,14 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByPhoneNumber(phoneNumber: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, data: Partial<InsertUser>): Promise<User | undefined>;
   updateUserPassword(id: number, password: string): Promise<boolean>;
   storeResetToken(email: string, token: string, expiry: Date): Promise<boolean>;
+  storePhoneResetToken(phoneNumber: string, token: string, expiry: Date): Promise<boolean>;
   getUserByResetToken(token: string): Promise<User | undefined>;
+  setUserVerified(userId: number): Promise<boolean>;
   
   // Profile methods
   getProfile(userId: number): Promise<Profile | undefined>;
@@ -64,6 +67,7 @@ export class MemStorage implements IStorage {
   private likes: Map<number, Like>;
   private messages: Map<number, Message>;
   private resetTokens: Map<string, { email: string, expiry: Date }>;
+  private phoneResetTokens: Map<string, { phoneNumber: string, expiry: Date }>;
   
   private userIdCounter: number;
   private profileIdCounter: number;
@@ -78,6 +82,7 @@ export class MemStorage implements IStorage {
     this.likes = new Map();
     this.messages = new Map();
     this.resetTokens = new Map();
+    this.phoneResetTokens = new Map();
     
     this.userIdCounter = 1;
     this.profileIdCounter = 1;
@@ -103,6 +108,12 @@ export class MemStorage implements IStorage {
     );
   }
   
+  async getUserByPhoneNumber(phoneNumber: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.phoneNumber === phoneNumber,
+    );
+  }
+  
   async createUser(userData: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
     const now = new Date();
@@ -110,7 +121,9 @@ export class MemStorage implements IStorage {
       ...userData, 
       id, 
       createdAt: now,
-      lastName: userData.lastName || null
+      lastName: userData.lastName || null,
+      phoneNumber: userData.phoneNumber || null,
+      isVerified: userData.isVerified || false
     };
     this.users.set(id, user);
     return user;
@@ -142,9 +155,24 @@ export class MemStorage implements IStorage {
   
   async getUserByResetToken(token: string): Promise<User | undefined> {
     const tokenData = this.resetTokens.get(token);
-    if (!tokenData) return undefined;
+    if (!tokenData) {
+      // Check if it's a phone token
+      const phoneTokenData = this.phoneResetTokens.get(token);
+      if (!phoneTokenData) return undefined;
+      
+      // Check if phone token has expired
+      const now = new Date();
+      if (now > phoneTokenData.expiry) {
+        // Token expired, remove it
+        this.phoneResetTokens.delete(token);
+        return undefined;
+      }
+      
+      // Phone token is valid, get user by phone number
+      return await this.getUserByPhoneNumber(phoneTokenData.phoneNumber);
+    }
     
-    // Check if token has expired
+    // Check if email token has expired
     const now = new Date();
     if (now > tokenData.expiry) {
       // Token expired, remove it
@@ -152,9 +180,24 @@ export class MemStorage implements IStorage {
       return undefined;
     }
     
-    // Token is valid, get user by email
+    // Email token is valid, get user by email
     const user = await this.getUserByEmail(tokenData.email);
     return user;
+  }
+  
+  async storePhoneResetToken(phoneNumber: string, token: string, expiry: Date): Promise<boolean> {
+    // Store the token with associated phone number and expiry date
+    this.phoneResetTokens.set(token, { phoneNumber, expiry });
+    return true;
+  }
+  
+  async setUserVerified(userId: number): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user) return false;
+    
+    user.isVerified = true;
+    this.users.set(userId, user);
+    return true;
   }
   
   // Profile methods

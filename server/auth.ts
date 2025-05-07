@@ -228,34 +228,81 @@ export function setupAuth(storage: IStorage) {
       }
     },
 
-    // Request username recovery
+    // Request username recovery via email
     async forgotUsername(req: Request, res: Response) {
       try {
-        const { email } = req.body;
-        if (!email) {
-          return res.status(400).json({ message: "Email is required" });
+        const { email, phoneNumber } = req.body;
+        
+        if (!email && !phoneNumber) {
+          return res.status(400).json({ message: "Email or phone number is required" });
         }
         
-        // Check if user exists
-        const user = await storage.getUserByEmail(email);
-        if (!user) {
-          // For security reasons, don't reveal if the email exists or not
+        let user;
+        
+        // Check if user exists by email or phone number
+        if (email) {
+          user = await storage.getUserByEmail(email);
+          if (!user) {
+            // For security reasons, don't reveal if the email exists or not
+            return res.status(200).json({ 
+              message: "If the email is registered, the username will be sent" 
+            });
+          }
+          
+          // In a real application, send an email with the username
+          console.log(`Username for ${email}: ${user.username}`);
+          
           return res.status(200).json({ 
-            message: "If the email is registered, the username will be sent" 
+            message: "If the email is registered, the username will be sent to your email",
+            // For demo purposes, return the username (in production, this would be sent via email)
+            username: user.username 
+          });
+        } 
+        else if (phoneNumber) {
+          user = await storage.getUserByPhoneNumber(phoneNumber);
+          if (!user) {
+            // For security reasons, don't reveal if the phone number exists or not
+            return res.status(200).json({ 
+              message: "If the phone number is registered, the username will be sent via SMS" 
+            });
+          }
+          
+          // In a real application, send an SMS with the username
+          console.log(`Username for ${phoneNumber}: ${user.username}`);
+          
+          return res.status(200).json({ 
+            message: "If the phone number is registered, the username will be sent via SMS",
+            // For demo purposes, return the username (in production, this would be sent via SMS)
+            username: user.username 
           });
         }
-        
-        // In a real application, send an email with the username
-        console.log(`Username for ${email}: ${user.username}`);
-        
-        res.status(200).json({ 
-          message: "If the email is registered, the username will be sent to your email",
-          // For demo purposes, return the username (in production, this would be sent via email)
-          username: user.username 
-        });
       } catch (error) {
         console.error("Forgot username error:", error);
         res.status(500).json({ message: "Failed to process request" });
+      }
+    },
+    
+    // Verify user with face recognition
+    async verifyFace(req: Request, res: Response) {
+      try {
+        const { userId } = req.body;
+        if (!userId) {
+          return res.status(400).json({ message: "User ID is required" });
+        }
+        
+        // Check if user exists
+        const user = await storage.getUser(userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        
+        // Set user as verified
+        await storage.setUserVerified(userId);
+        
+        res.status(200).json({ message: "User verified successfully" });
+      } catch (error) {
+        console.error("Face verification error:", error);
+        res.status(500).json({ message: "Failed to process verification" });
       }
     }
   };

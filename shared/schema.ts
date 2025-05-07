@@ -8,11 +8,13 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
+  phoneNumber: text("phone_number").unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name"),
   dateOfBirth: text("date_of_birth").notNull(),
   gender: text("gender").notNull(),
   interestedIn: text("interested_in").notNull(),
+  isVerified: boolean("is_verified").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

@@ -41,6 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/forgot-password", auth.forgotPassword);
   app.post("/api/auth/reset-password", auth.resetPassword);
   app.post("/api/auth/forgot-username", auth.forgotUsername);
+  app.post("/api/auth/verify-face", auth.verifyFace);
 
   // User profile routes
   app.get("/api/profile", isAuthenticated, async (req, res) => {

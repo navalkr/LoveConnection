@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,11 +20,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Heart, Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Define schemas for the forms
-const requestResetSchema = z.object({
+const requestEmailResetSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address",
+  }),
+});
+
+const requestPhoneResetSchema = z.object({
+  phoneNumber: z.string().min(10, {
+    message: "Please enter a valid phone number",
   }),
 });
 
@@ -42,7 +50,8 @@ const resetPasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
-type RequestResetValues = z.infer<typeof requestResetSchema>;
+type RequestEmailResetValues = z.infer<typeof requestEmailResetSchema>;
+type RequestPhoneResetValues = z.infer<typeof requestPhoneResetSchema>;
 type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
 export default function ForgotPasswordPage() {
@@ -52,11 +61,19 @@ export default function ForgotPasswordPage() {
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetToken, setResetToken] = useState("");
 
-  // Request reset form
-  const requestForm = useForm<RequestResetValues>({
-    resolver: zodResolver(requestResetSchema),
+  // Email reset form 
+  const emailForm = useForm<RequestEmailResetValues>({
+    resolver: zodResolver(requestEmailResetSchema),
     defaultValues: {
       email: "",
+    },
+  });
+  
+  // Phone reset form
+  const phoneForm = useForm<RequestPhoneResetValues>({
+    resolver: zodResolver(requestPhoneResetSchema),
+    defaultValues: {
+      phoneNumber: "",
     },
   });
 
@@ -75,8 +92,8 @@ export default function ForgotPasswordPage() {
     }
   });
 
-  // Handle forgot password request
-  const onRequestSubmit = async (data: RequestResetValues) => {
+  // Handle email reset request
+  const onEmailReset = async (data: RequestEmailResetValues) => {
     try {
       setIsRequestSubmitting(true);
       const response = await apiRequest("POST", "/api/auth/forgot-password", data);
@@ -85,6 +102,34 @@ export default function ForgotPasswordPage() {
       toast({
         title: "Reset Email Sent",
         description: "If the email is registered, you will receive a reset link.",
+      });
+      
+      // For demo purposes, populate the token field
+      if (result.token) {
+        setResetToken(result.token);
+        setShowResetForm(true);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to process your request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRequestSubmitting(false);
+    }
+  };
+
+  // Handle phone reset request
+  const onPhoneReset = async (data: RequestPhoneResetValues) => {
+    try {
+      setIsRequestSubmitting(true);
+      const response = await apiRequest("POST", "/api/auth/forgot-password", data);
+      const result = await response.json();
+      
+      toast({
+        title: "Reset SMS Sent",
+        description: "If the phone number is registered, you will receive a reset code via SMS.",
       });
       
       // For demo purposes, populate the token field
@@ -118,7 +163,8 @@ export default function ForgotPasswordPage() {
       });
       
       // Reset the forms
-      requestForm.reset();
+      emailForm.reset();
+      phoneForm.reset();
       resetForm.reset();
       setShowResetForm(false);
     } catch (error) {
@@ -148,43 +194,98 @@ export default function ForgotPasswordPage() {
         </div>
 
         {!showResetForm ? (
-          <Form {...requestForm}>
-            <form onSubmit={requestForm.handleSubmit(onRequestSubmit)} className="space-y-4">
-              <FormField
-                control={requestForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="email" 
-                        placeholder="your@email.com" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <Tabs defaultValue="email" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="email">Email</TabsTrigger>
+              <TabsTrigger value="phone">Phone</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="email">
+              <Form {...emailForm}>
+                <form onSubmit={emailForm.handleSubmit(onEmailReset)} className="space-y-4 pt-4">
+                  <FormField
+                    control={emailForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="email" 
+                            placeholder="your@email.com" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Enter the email address you used when registering
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <Button
-                type="submit"
-                variant="gradient"
-                className="w-full"
-                disabled={isRequestSubmitting}
-              >
-                {isRequestSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  "Send Reset Link"
-                )}
-              </Button>
-            </form>
-          </Form>
+                  <Button
+                    type="submit"
+                    variant="gradient"
+                    className="w-full"
+                    disabled={isRequestSubmitting}
+                  >
+                    {isRequestSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending Email...
+                      </>
+                    ) : (
+                      "Send Reset Link"
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </TabsContent>
+            
+            <TabsContent value="phone">
+              <Form {...phoneForm}>
+                <form onSubmit={phoneForm.handleSubmit(onPhoneReset)} className="space-y-4 pt-4">
+                  <FormField
+                    control={phoneForm.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="tel" 
+                            placeholder="+1234567890" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Enter the phone number you used when registering
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button
+                    type="submit"
+                    variant="gradient"
+                    className="w-full"
+                    disabled={isRequestSubmitting}
+                  >
+                    {isRequestSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending SMS...
+                      </>
+                    ) : (
+                      "Send Reset Code"
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </TabsContent>
+          </Tabs>
         ) : (
           <Form {...resetForm}>
             <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">

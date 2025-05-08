@@ -69,6 +69,8 @@ export const messages = pgTable("messages", {
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
+  verificationToken: true,
+  verificationTokenExpiry: true,
 });
 
 export const insertProfileSchema = createInsertSchema(profiles).omit({

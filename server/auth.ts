@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { IStorage } from "./storage";
 import { User } from "@shared/schema";
 import crypto from "crypto";
+import { sendVerificationEmail } from "./emailService";
 
 // For a production application, use a proper password hashing library like bcrypt
 // This is a simplified version for the demo
@@ -34,8 +35,8 @@ export function isAuthenticated(req: Request, res: Response, next: NextFunction)
   res.status(401).json({ message: "Unauthorized" });
 }
 
-// Generate a reset token for password reset
-function generateResetToken(): string {
+// Generate tokens for password reset and verification
+function generateToken(): string {
   return crypto.randomBytes(32).toString('hex');
 }
 
@@ -172,7 +173,7 @@ export function setupAuth(storage: IStorage) {
         }
         
         // Generate reset token with 1 hour expiry
-        const token = generateResetToken();
+        const token = generateToken();
         const expiry = new Date();
         expiry.setHours(expiry.getHours() + 1);
         

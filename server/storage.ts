@@ -30,6 +30,8 @@ export interface IStorage {
   storePhoneResetToken(phoneNumber: string, token: string, expiry: Date): Promise<boolean>;
   getUserByResetToken(token: string): Promise<User | undefined>;
   setUserVerified(userId: number): Promise<boolean>;
+  storeVerificationToken(userId: number, token: string, expiry: Date): Promise<boolean>;
+  getUserByVerificationToken(token: string): Promise<User | undefined>;
   
   // Profile methods
   getProfile(userId: number): Promise<Profile | undefined>;
@@ -68,6 +70,7 @@ export class MemStorage implements IStorage {
   private messages: Map<number, Message>;
   private resetTokens: Map<string, { email: string, expiry: Date }>;
   private phoneResetTokens: Map<string, { phoneNumber: string, expiry: Date }>;
+  private verificationTokens: Map<string, { userId: number, expiry: Date }>;
   
   private userIdCounter: number;
   private profileIdCounter: number;
@@ -83,6 +86,7 @@ export class MemStorage implements IStorage {
     this.messages = new Map();
     this.resetTokens = new Map();
     this.phoneResetTokens = new Map();
+    this.verificationTokens = new Map();
     
     this.userIdCounter = 1;
     this.profileIdCounter = 1;
@@ -123,7 +127,9 @@ export class MemStorage implements IStorage {
       createdAt: now,
       lastName: userData.lastName || null,
       phoneNumber: userData.phoneNumber || null,
-      isVerified: userData.isVerified || false
+      isVerified: userData.isVerified || false,
+      verificationToken: userData.verificationToken || null,
+      verificationTokenExpiry: userData.verificationTokenExpiry || null
     };
     this.users.set(id, user);
     return user;
@@ -196,8 +202,38 @@ export class MemStorage implements IStorage {
     if (!user) return false;
     
     user.isVerified = true;
+    user.verificationToken = null;
+    user.verificationTokenExpiry = null;
     this.users.set(userId, user);
     return true;
+  }
+  
+  async storeVerificationToken(userId: number, token: string, expiry: Date): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user) return false;
+    
+    user.verificationToken = token;
+    user.verificationTokenExpiry = expiry;
+    this.users.set(userId, user);
+    
+    this.verificationTokens.set(token, { userId, expiry });
+    return true;
+  }
+  
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    const tokenData = this.verificationTokens.get(token);
+    if (!tokenData) return undefined;
+    
+    // Check if token has expired
+    const now = new Date();
+    if (now > tokenData.expiry) {
+      // Token expired, remove it
+      this.verificationTokens.delete(token);
+      return undefined;
+    }
+    
+    // Token is valid, get user by ID
+    return await this.getUser(tokenData.userId);
   }
   
   // Profile methods

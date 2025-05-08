@@ -15,6 +15,8 @@ export const users = pgTable("users", {
   gender: text("gender").notNull(),
   interestedIn: text("interested_in").notNull(),
   isVerified: boolean("is_verified").default(false).notNull(),
+  verificationToken: text("verification_token"),
+  verificationTokenExpiry: timestamp("verification_token_expiry"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

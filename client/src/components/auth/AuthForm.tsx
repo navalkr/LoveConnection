@@ -44,6 +44,7 @@ const registerSchema = z.object({
   lastName: z.string().optional(),
   phoneNumber: z.string()
     .min(10, { message: "Phone number must be at least 10 digits" })
+    .or(z.literal(""))
     .optional(),
   dateOfBirth: z.string().refine((dob) => {
     const date = new Date(dob);
@@ -116,8 +117,16 @@ export default function AuthForm({ type }: AuthFormProps) {
   // Handle register submission
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     try {
-      await registerUser(data as InsertUser);
-      setLocation(ROUTES.DISCOVER);
+      const result = await registerUser(data as InsertUser);
+      
+      // Check if verification email was sent
+      // If verification was required, redirect to a verification notification page
+      // Otherwise, go to discover page
+      if (result && result.verificationEmailSent) {
+        setLocation(ROUTES.VERIFY_NOTIFICATION);
+      } else {
+        setLocation(ROUTES.DISCOVER);
+      }
     } catch (error) {
       console.error("Registration failed:", error);
     }

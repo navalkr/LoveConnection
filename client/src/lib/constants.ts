@@ -137,5 +137,6 @@ export const ROUTES = {
   PROFILE: "/profile",
   FORGOT_PASSWORD: "/forgot-password",
   FORGOT_USERNAME: "/forgot-username",
-  FACE_VERIFICATION: "/face-verification",
+  FACE_VERIFICATION: "/face-verification/:token",
+  VERIFY_NOTIFICATION: "/verify-notification",
 };

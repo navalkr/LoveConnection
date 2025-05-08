@@ -8,30 +8,25 @@ export default function MobileNav() {
   return (
     <nav className="md:hidden bg-white shadow-lg fixed bottom-0 left-0 right-0 z-50">
       <div className="flex justify-around">
-        <Link href={ROUTES.DISCOVER}>
-          <a className={`flex flex-col items-center py-3 px-5 ${
+        <Link href={ROUTES.DISCOVER} className={`flex flex-col items-center py-3 px-5 ${
             location === ROUTES.DISCOVER 
               ? 'text-primary' 
               : 'text-neutral-500'
           }`}>
             <Compass className="text-xl" size={20} />
             <span className="text-xs mt-1">Discover</span>
-          </a>
         </Link>
         
-        <Link href={ROUTES.MATCHES}>
-          <a className={`flex flex-col items-center py-3 px-5 ${
+        <Link href={ROUTES.MATCHES} className={`flex flex-col items-center py-3 px-5 ${
             location === ROUTES.MATCHES 
               ? 'text-primary' 
               : 'text-neutral-500'
           }`}>
             <Heart className="text-xl" size={20} />
             <span className="text-xs mt-1">Matches</span>
-          </a>
         </Link>
         
-        <Link href={ROUTES.MESSAGES}>
-          <a className={`flex flex-col items-center py-3 px-5 relative ${
+        <Link href={ROUTES.MESSAGES} className={`flex flex-col items-center py-3 px-5 relative ${
             location === ROUTES.MESSAGES || location.startsWith('/conversation') 
               ? 'text-primary' 
               : 'text-neutral-500'
@@ -39,18 +34,15 @@ export default function MobileNav() {
             <MessageCircle className="text-xl" size={20} />
             <span className="text-xs mt-1">Messages</span>
             {/* Notification indicator would be conditionally rendered based on unread messages */}
-          </a>
         </Link>
         
-        <Link href={ROUTES.PROFILE}>
-          <a className={`flex flex-col items-center py-3 px-5 ${
+        <Link href={ROUTES.PROFILE} className={`flex flex-col items-center py-3 px-5 ${
             location === ROUTES.PROFILE 
               ? 'text-primary' 
               : 'text-neutral-500'
           }`}>
             <User className="text-xl" size={20} />
             <span className="text-xs mt-1">Profile</span>
-          </a>
         </Link>
       </div>
     </nav>

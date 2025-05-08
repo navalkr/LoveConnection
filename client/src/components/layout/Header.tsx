@@ -31,30 +31,22 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex-shrink-0 flex items-center">
-            <Link href={ROUTES.HOME}>
-              <a className="text-2xl font-bold text-primary flex items-center">
+            <Link href={ROUTES.HOME} className="text-2xl font-bold text-primary flex items-center">
                 <Heart className="mr-2" fill="currentColor" />
                 Heartlink
-              </a>
             </Link>
           </div>
           
           {isAuthenticated ? (
             <nav className="hidden md:flex space-x-8">
-              <Link href={ROUTES.DISCOVER}>
-                <a className={`px-3 py-2 text-sm font-medium ${location === ROUTES.DISCOVER ? 'text-primary' : 'text-neutral-900 hover:text-primary'}`}>
-                  Discover
-                </a>
+              <Link href={ROUTES.DISCOVER} className={`px-3 py-2 text-sm font-medium ${location === ROUTES.DISCOVER ? 'text-primary' : 'text-neutral-900 hover:text-primary'}`}>
+                Discover
               </Link>
-              <Link href={ROUTES.MATCHES}>
-                <a className={`px-3 py-2 text-sm font-medium ${location === ROUTES.MATCHES ? 'text-primary' : 'text-neutral-900 hover:text-primary'}`}>
-                  Matches
-                </a>
+              <Link href={ROUTES.MATCHES} className={`px-3 py-2 text-sm font-medium ${location === ROUTES.MATCHES ? 'text-primary' : 'text-neutral-900 hover:text-primary'}`}>
+                Matches
               </Link>
-              <Link href={ROUTES.MESSAGES}>
-                <a className={`px-3 py-2 text-sm font-medium ${location === ROUTES.MESSAGES ? 'text-primary' : 'text-neutral-900 hover:text-primary'}`}>
-                  Messages
-                </a>
+              <Link href={ROUTES.MESSAGES} className={`px-3 py-2 text-sm font-medium ${location === ROUTES.MESSAGES ? 'text-primary' : 'text-neutral-900 hover:text-primary'}`}>
+                Messages
               </Link>
               <div className="relative">
                 <DropdownMenu>
@@ -74,8 +66,8 @@ export default function Header() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={ROUTES.PROFILE}>
-                        <a className="cursor-pointer w-full">View Profile</a>
+                      <Link href={ROUTES.PROFILE} className="cursor-pointer w-full">
+                        View Profile
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -88,10 +80,8 @@ export default function Header() {
             </nav>
           ) : (
             <div className="hidden md:flex items-center space-x-4">
-              <Link href={ROUTES.LOGIN}>
-                <a className="text-primary hover:text-primary-dark font-medium">
-                  Log in
-                </a>
+              <Link href={ROUTES.LOGIN} className="text-primary hover:text-primary-dark font-medium">
+                Log in
               </Link>
               <Link href={ROUTES.REGISTER}>
                 <Button variant="gradient" rounded="full">

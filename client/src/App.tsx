@@ -21,6 +21,7 @@ import Conversation from "@/pages/conversation";
 import ProfilePage from "@/pages/profile";
 import ForgotPassword from "@/pages/forgot-password";
 import ForgotUsername from "@/pages/forgot-username";
+import FaceVerificationPage from "@/pages/face-verification";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -30,7 +31,8 @@ function Router() {
   const isAuthPage = location === ROUTES.LOGIN || 
                     location === ROUTES.REGISTER || 
                     location === ROUTES.FORGOT_PASSWORD || 
-                    location === ROUTES.FORGOT_USERNAME;
+                    location === ROUTES.FORGOT_USERNAME ||
+                    location === ROUTES.FACE_VERIFICATION;
   const isFullPage = location.startsWith('/discover') || 
                      location.startsWith('/messages') || 
                      location === ROUTES.HOME;
@@ -40,7 +42,8 @@ function Router() {
                         location !== ROUTES.LOGIN && 
                         location !== ROUTES.REGISTER &&
                         location !== ROUTES.FORGOT_PASSWORD &&
-                        location !== ROUTES.FORGOT_USERNAME;
+                        location !== ROUTES.FORGOT_USERNAME &&
+                        location !== ROUTES.FACE_VERIFICATION;
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -58,6 +61,7 @@ function Router() {
           <Route path={ROUTES.PROFILE} component={ProfilePage} />
           <Route path={ROUTES.FORGOT_PASSWORD} component={ForgotPassword} />
           <Route path={ROUTES.FORGOT_USERNAME} component={ForgotUsername} />
+          <Route path={ROUTES.FACE_VERIFICATION} component={FaceVerificationPage} />
           <Route component={NotFound} />
         </Switch>
       </main>

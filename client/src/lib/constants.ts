@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     FORGOT_PASSWORD: '/api/auth/forgot-password',
     RESET_PASSWORD: '/api/auth/reset-password',
     FORGOT_USERNAME: '/api/auth/forgot-username',
+    FACE_VERIFICATION: '/api/auth/verify-face',
   },
   PROFILE: {
     GET: '/api/profile',
@@ -136,4 +137,5 @@ export const ROUTES = {
   PROFILE: "/profile",
   FORGOT_PASSWORD: "/forgot-password",
   FORGOT_USERNAME: "/forgot-username",
+  FACE_VERIFICATION: "/face-verification",
 };

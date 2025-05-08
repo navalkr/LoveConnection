@@ -47,10 +47,8 @@ export default function Home() {
                         </Link>
                       </div>
                       <div className="mt-3 sm:mt-4 text-sm">
-                        <Link href={ROUTES.LOGIN}>
-                          <a className="font-medium text-primary hover:text-primary-dark">
-                            Already have an account? Sign in <span aria-hidden="true">→</span>
-                          </a>
+                        <Link href={ROUTES.LOGIN} className="font-medium text-primary hover:text-primary-dark">
+                          Already have an account? Sign in <span aria-hidden="true">→</span>
                         </Link>
                       </div>
                     </div>

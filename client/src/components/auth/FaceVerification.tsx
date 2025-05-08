@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
 
 import {
   Card,
@@ -15,19 +16,52 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Camera, CheckCircle } from "lucide-react";
 
 interface FaceVerificationProps {
-  userId: number;
+  verificationToken: string;
   onVerificationComplete: () => void;
 }
 
-export default function FaceVerification({ userId, onVerificationComplete }: FaceVerificationProps) {
+export default function FaceVerification({ 
+  verificationToken, 
+  onVerificationComplete 
+}: FaceVerificationProps) {
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { user } = useAuth();
+
+  // Use a mutation for face verification
+  const verifyMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/auth/verify-face", {
+        token: verificationToken,
+        // In a real implementation, you might include:
+        // imageData: capturedImage
+      });
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Verification Successful",
+        description: "Your identity has been verified. You can now access your account.",
+      });
+      
+      setIsVerified(true);
+      
+      // Notify parent component that verification is complete after a short delay
+      setTimeout(() => {
+        onVerificationComplete();
+      }, 2000);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Verification Failed",
+        description: "We couldn't verify your identity. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
 
   useEffect(() => {
     return () => {
@@ -89,44 +123,6 @@ export default function FaceVerification({ userId, onVerificationComplete }: Fac
     await startCamera();
   };
 
-  const verifyFace = async () => {
-    if (!capturedImage || !userId) return;
-    
-    setIsProcessing(true);
-    try {
-      // For demo purposes, we're not actually sending the image data
-      // In a real app, you'd upload the image to a face recognition service
-      const response = await apiRequest("POST", "/api/auth/verify-face", {
-        userId,
-        // In a real implementation, you might send the image data
-        // imageData: capturedImage
-      });
-      
-      const result = await response.json();
-      
-      toast({
-        title: "Verification Successful",
-        description: "Your identity has been verified.",
-      });
-      
-      setIsVerified(true);
-      
-      // Notify parent component that verification is complete
-      setTimeout(() => {
-        onVerificationComplete();
-      }, 2000);
-      
-    } catch (error) {
-      toast({
-        title: "Verification Failed",
-        description: "Failed to verify your identity. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
@@ -141,6 +137,9 @@ export default function FaceVerification({ userId, onVerificationComplete }: Fac
             <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
             <p className="text-lg font-medium text-center">
               Verification Complete
+            </p>
+            <p className="text-neutral-600 text-center mt-2">
+              You'll be redirected to your account shortly.
             </p>
           </div>
         ) : (
@@ -212,12 +211,12 @@ export default function FaceVerification({ userId, onVerificationComplete }: Fac
                 </Button>
                 
                 <Button 
-                  onClick={verifyFace}
+                  onClick={() => verifyMutation.mutate()}
                   className="flex-1"
                   variant="default"
-                  disabled={isProcessing}
+                  disabled={verifyMutation.isPending}
                 >
-                  {isProcessing ? (
+                  {verifyMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Verifying...

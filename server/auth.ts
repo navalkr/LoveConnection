@@ -66,6 +66,7 @@ export function setupAuth(storage: IStorage) {
           username,
           email,
           password: hashedPassword,
+          isVerified: false // Ensure user starts as unverified
         });
         
         // Create empty profile
@@ -82,14 +83,28 @@ export function setupAuth(storage: IStorage) {
           photos: [],
         });
         
+        // Generate verification token with 24 hour expiry
+        const verificationToken = generateToken();
+        const tokenExpiry = new Date();
+        tokenExpiry.setHours(tokenExpiry.getHours() + 24);
+        
+        // Store verification token
+        await storage.storeVerificationToken(user.id, verificationToken, tokenExpiry);
+        
+        // Send verification email
+        const emailSent = await sendVerificationEmail(email, userData.firstName, verificationToken);
+        
         // Set up session
         req.session.userId = user.id;
         req.session.user = user;
         req.session.isAuthenticated = true;
         
-        // Return user without password
+        // Return user without password and include email status
         const { password: _, ...userWithoutPassword } = user;
-        res.status(201).json(userWithoutPassword);
+        res.status(201).json({
+          ...userWithoutPassword,
+          verificationEmailSent: emailSent
+        });
       } catch (error) {
         console.error("Registration error:", error);
         res.status(500).json({ message: "Failed to register user" });
@@ -110,6 +125,26 @@ export function setupAuth(storage: IStorage) {
         // Verify password
         if (!verifyPassword(password, user.password)) {
           return res.status(401).json({ message: "Invalid username or password" });
+        }
+        
+        // Check if the user is verified
+        if (!user.isVerified) {
+          // If not verified, we can resend the verification email
+          const verificationToken = generateToken();
+          const tokenExpiry = new Date();
+          tokenExpiry.setHours(tokenExpiry.getHours() + 24);
+          
+          // Store verification token
+          await storage.storeVerificationToken(user.id, verificationToken, tokenExpiry);
+          
+          // Send verification email
+          await sendVerificationEmail(user.email, user.firstName, verificationToken);
+          
+          return res.status(403).json({ 
+            message: "Account not verified", 
+            verified: false,
+            email: user.email
+          });
         }
         
         // Set up session
@@ -311,21 +346,32 @@ export function setupAuth(storage: IStorage) {
     // Verify user with face recognition
     async verifyFace(req: Request, res: Response) {
       try {
-        const { userId } = req.body;
-        if (!userId) {
-          return res.status(400).json({ message: "User ID is required" });
+        const { token } = req.body;
+        if (!token) {
+          return res.status(400).json({ message: "Verification token is required" });
         }
         
-        // Check if user exists
-        const user = await storage.getUser(userId);
+        // Find user by verification token
+        const user = await storage.getUserByVerificationToken(token);
         if (!user) {
-          return res.status(404).json({ message: "User not found" });
+          return res.status(400).json({ message: "Invalid or expired verification token" });
         }
         
         // Set user as verified
-        await storage.setUserVerified(userId);
+        await storage.setUserVerified(user.id);
         
-        res.status(200).json({ message: "User verified successfully" });
+        // Log the user in automatically
+        req.session.userId = user.id;
+        req.session.user = user;
+        req.session.isAuthenticated = true;
+        
+        // Return verified user (without password)
+        const { password, ...userWithoutPassword } = user;
+        
+        res.status(200).json({ 
+          message: "Face verification successful", 
+          user: { ...userWithoutPassword, isVerified: true }
+        });
       } catch (error) {
         console.error("Face verification error:", error);
         res.status(500).json({ message: "Failed to process verification" });

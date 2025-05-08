@@ -42,6 +42,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/reset-password", auth.resetPassword);
   app.post("/api/auth/forgot-username", auth.forgotUsername);
   app.post("/api/auth/verify-face", auth.verifyFace);
+  
+  // Get verification token info (for face verification page)
+  app.get("/api/auth/verification/:token", async (req, res) => {
+    try {
+      const token = req.params.token;
+      const user = await storage.getUserByVerificationToken(token);
+      
+      if (!user) {
+        return res.status(400).json({ valid: false, message: "Invalid or expired verification token" });
+      }
+      
+      res.json({ 
+        valid: true, 
+        userId: user.id,
+        firstName: user.firstName,
+        isVerified: user.isVerified
+      });
+    } catch (error) {
+      console.error("Verification token check error:", error);
+      res.status(500).json({ valid: false, message: "Failed to check verification token" });
+    }
+  });
 
   // User profile routes
   app.get("/api/profile", isAuthenticated, async (req, res) => {

@@ -1,9 +1,10 @@
 from flask import Flask
-from api.auth import auth_bp
-from api.profile import profile_bp
-from api.discover import discover_bp
-from api.likes import likes_bp
-from api.matches import matches_bp
+from python_backend.api.auth import auth_bp
+from python_backend.api.profile import profile_bp
+from python_backend.api.discover import discover_bp
+from python_backend.api.likes import likes_bp
+from python_backend.api.matches import matches_bp
+from python_backend.api.behavior import behavior_bp
 
 def register_routes(app: Flask):
     """Register all API routes"""
@@ -12,5 +13,6 @@ def register_routes(app: Flask):
     app.register_blueprint(discover_bp)
     app.register_blueprint(likes_bp)
     app.register_blueprint(matches_bp)
+    app.register_blueprint(behavior_bp)
     
     return app

@@ -1,75 +1,68 @@
 import os
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Email, To, Content, HtmlContent
+from sendgrid.helpers.mail import Mail, Content, Email
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
+# Get SendGrid API key
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+APP_URL = os.environ.get('APP_URL', 'http://localhost:5000')
+
 def send_email(to_email, subject, text_content=None, html_content=None):
     """
     Send an email using SendGrid
     """
-    if not os.environ.get('SENDGRID_API_KEY'):
-        print("SENDGRID_API_KEY environment variable is not set")
+    if not SENDGRID_API_KEY:
+        print("Warning: SENDGRID_API_KEY not found in environment variables")
         return False
-
+    
+    if not text_content and not html_content:
+        raise ValueError("Either text_content or html_content must be provided")
+    
+    from_email = Email('noreply@heartlink.com')
+    to_email = Email(to_email)
+    
+    # Create content object based on what's provided
+    content = Content('text/html', html_content) if html_content else Content('text/plain', text_content)
+    
+    # Create mail object
+    message = Mail(from_email, to_email, subject, content)
+    
     try:
-        sg = SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
+        # Send the email
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        response = sg.client.mail.send.post(request_body=message.get())
         
-        from_email = Email('info@heartlink.com')  # Use your verified sender
-        to_email = To(to_email)
-        
-        if html_content:
-            content = HtmlContent(html_content)
-        else:
-            content = Content("text/plain", text_content or "")
-        
-        mail = Mail(from_email, to_email, subject, content)
-        
-        response = sg.client.mail.send.post(request_body=mail.get())
-        
-        if response.status_code >= 200 and response.status_code < 300:
-            return True
-        else:
-            print(f"SendGrid email error: {response.status_code}")
-            return False
-            
+        return response.status_code >= 200 and response.status_code < 300
     except Exception as e:
-        print(f"SendGrid email error: {e}")
+        print(f"Error sending email: {e}")
         return False
 
 def send_verification_email(email, first_name, verification_token):
     """
     Send a verification email with face recognition link
     """
-    app_url = os.environ.get('APP_URL', 'http://localhost:5000')
-    verification_url = f"{app_url}/face-verification?token={verification_token}"
+    subject = "Verify Your Heartlink Account"
     
-    subject = 'Verify your Heartlink account'
-    html = f"""
+    # Create verification URL
+    verification_url = f"{APP_URL}/verify-face/{verification_token}"
+    
+    # Create email content
+    html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: linear-gradient(to right, #ff4b6b, #ff9248); padding: 20px; text-align: center; color: white;">
-        <h1 style="margin: 0;">Heartlink</h1>
-      </div>
-      <div style="padding: 20px; border: 1px solid #eee; border-top: none;">
-        <h2>Hello, {first_name}!</h2>
-        <p>Thank you for registering with Heartlink. To complete your registration and ensure the security of your account, we need to verify your identity.</p>
-        <p>Please click the button below to verify your face:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="{verification_url}" style="background: linear-gradient(to right, #ff4b6b, #ff9248); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify My Face</a>
+        <h2 style="color: #ff4b91;">Welcome to Heartlink, {first_name}!</h2>
+        <p>Thank you for registering with Heartlink. To complete your registration, we need to verify your identity through our face verification system.</p>
+        <p>This helps us ensure that all users on our platform are real people, creating a safer dating environment for everyone.</p>
+        <div style="margin: 25px 0;">
+            <a href="{verification_url}" style="background-color: #ff4b91; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify My Face</a>
         </div>
-        <p>Or copy and paste this link into your browser:</p>
-        <p style="word-break: break-all; color: #5c5c5c;">{verification_url}</p>
-        <p>This link will expire in 24 hours.</p>
-        <p>If you didn't create an account on Heartlink, please ignore this email.</p>
-        <p>Best regards,<br>The Heartlink Team</p>
-      </div>
-      <div style="background: #f7f7f7; padding: 15px; text-align: center; font-size: 12px; color: #666;">
-        <p>&copy; 2025 Heartlink. All rights reserved.</p>
-        <p>Please do not reply to this email.</p>
-      </div>
+        <p>If the button above doesn't work, you can also copy and paste the following link into your browser:</p>
+        <p><a href="{verification_url}">{verification_url}</a></p>
+        <p>This link will expire in 24 hours for security reasons.</p>
+        <p>Thank you for choosing Heartlink!</p>
     </div>
     """
     
-    return send_email(email, subject, html_content=html)
+    return send_email(email, subject, html_content=html_content)

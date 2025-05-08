@@ -1,63 +1,87 @@
 from flask import Blueprint, request, jsonify, session
-from models.db import db
-from models.models import User, Profile
-from utils.auth import login_required
+from datetime import datetime
+from python_backend.models.db import db
+from python_backend.models.models import User, Profile
+from python_backend.utils.auth import login_required
 
 profile_bp = Blueprint('profile', __name__, url_prefix='/api/profile')
 
 @profile_bp.route('', methods=['GET'])
 @login_required
 def get_profile():
-    try:
-        user_id = session.get('user_id')
-        profile = Profile.query.filter_by(user_id=user_id).first()
-        
-        if not profile:
-            return jsonify({"message": "Profile not found"}), 404
-            
-        return jsonify(profile.to_dict()), 200
-        
-    except Exception as e:
-        print(f"Get profile error: {str(e)}")
-        return jsonify({"message": "Failed to get profile"}), 500
+    """Get user's profile"""
+    user_id = session.get('user_id')
+    
+    # Get the user profile
+    profile = Profile.query.filter_by(user_id=user_id).first()
+    
+    if not profile:
+        return jsonify({"error": "Profile not found"}), 404
+    
+    # Get the user to combine data
+    user = User.query.get(user_id)
+    
+    # Combine user and profile data
+    user_data = user.to_dict()
+    profile_data = profile.to_dict()
+    
+    # Update last active time
+    profile.last_active = datetime.utcnow()
+    db.session.commit()
+    
+    return jsonify({**user_data, **profile_data}), 200
 
-@profile_bp.route('', methods=['PUT'])
+@profile_bp.route('', methods=['PUT', 'PATCH'])
 @login_required
 def update_profile():
+    """Update user's profile"""
+    user_id = session.get('user_id')
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    
+    # Get the profile
+    profile = Profile.query.filter_by(user_id=user_id).first()
+    
+    if not profile:
+        return jsonify({"error": "Profile not found"}), 404
+    
+    # Get the user for updating user-specific fields
+    user = User.query.get(user_id)
+    
+    # Fields that can be updated on the user model
+    user_updatable_fields = [
+        'first_name', 'last_name', 'phone_number', 'gender', 'interested_in'
+    ]
+    
+    # Fields that can be updated on the profile model
+    profile_updatable_fields = [
+        'bio', 'country', 'state', 'city', 'vicinity', 'coordinates', 
+        'profession', 'interests', 'photos'
+    ]
+    
+    # Update user fields
+    for field in user_updatable_fields:
+        if field in data:
+            setattr(user, field, data[field])
+    
+    # Update profile fields
+    for field in profile_updatable_fields:
+        if field in data:
+            setattr(profile, field, data[field])
+    
+    # Update last active time
+    profile.last_active = datetime.utcnow()
+    
     try:
-        user_id = session.get('user_id')
-        data = request.get_json()
-        
-        # Find profile
-        profile = Profile.query.filter_by(user_id=user_id).first()
-        if not profile:
-            return jsonify({"message": "Profile not found"}), 404
-            
-        # Update fields if provided
-        if 'bio' in data:
-            profile.bio = data['bio']
-        if 'country' in data:
-            profile.country = data['country']
-        if 'state' in data:
-            profile.state = data['state']
-        if 'city' in data:
-            profile.city = data['city']
-        if 'vicinity' in data:
-            profile.vicinity = data['vicinity']
-        if 'coordinates' in data:
-            profile.coordinates = data['coordinates']
-        if 'profession' in data:
-            profile.profession = data['profession']
-        if 'interests' in data:
-            profile.interests = data['interests']
-        if 'photos' in data:
-            profile.photos = data['photos']
-            
         db.session.commit()
         
-        return jsonify(profile.to_dict()), 200
+        # Get updated data
+        user_data = user.to_dict()
+        profile_data = profile.to_dict()
         
+        return jsonify({**user_data, **profile_data}), 200
     except Exception as e:
         db.session.rollback()
-        print(f"Update profile error: {str(e)}")
-        return jsonify({"message": "Failed to update profile"}), 500
+        return jsonify({"error": "Failed to update profile", "details": str(e)}), 500

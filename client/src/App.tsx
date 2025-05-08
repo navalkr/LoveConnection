@@ -22,6 +22,7 @@ import ProfilePage from "@/pages/profile";
 import ForgotPassword from "@/pages/forgot-password";
 import ForgotUsername from "@/pages/forgot-username";
 import FaceVerificationPage from "@/pages/face-verification";
+import VerifyNotification from "@/pages/verify-notification";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -62,6 +63,7 @@ function Router() {
           <Route path={ROUTES.FORGOT_PASSWORD} component={ForgotPassword} />
           <Route path={ROUTES.FORGOT_USERNAME} component={ForgotUsername} />
           <Route path={ROUTES.FACE_VERIFICATION} component={FaceVerificationPage} />
+          <Route path={ROUTES.VERIFY_NOTIFICATION} component={VerifyNotification} />
           <Route component={NotFound} />
         </Switch>
       </main>

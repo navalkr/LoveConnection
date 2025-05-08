@@ -154,7 +154,8 @@ export function useAuth(): AuthState {
   });
 
   const register = async (data: InsertUser) => {
-    await registerMutation.mutateAsync(data);
+    const result = await registerMutation.mutateAsync(data);
+    return result;
   };
 
   const login = async (data: Login) => {

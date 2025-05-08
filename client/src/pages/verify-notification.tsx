@@ -9,9 +9,26 @@ export default function VerifyNotification() {
   const [resendSuccess, setResendSuccess] = useState(false);
   
   const handleResendEmail = async () => {
-    // In a real implementation, we would call an API to resend the verification email
-    // For now, just show a success message
-    setResendSuccess(true);
+    try {
+      // Call the API to resend the verification email
+      const response = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        setResendSuccess(true);
+      } else {
+        // Handle error
+        const data = await response.json();
+        console.error('Failed to resend verification email:', data.error);
+      }
+    } catch (error) {
+      console.error('Error resending verification email:', error);
+    }
   };
   
   return (

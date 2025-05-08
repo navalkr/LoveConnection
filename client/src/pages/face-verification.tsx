@@ -18,8 +18,8 @@ interface VerificationTokenResponse {
 export default function FaceVerificationPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const [, params] = useRoute("/face-verification");
-  const token = new URLSearchParams(window.location.search).get("token");
+  const [, params] = useRoute(ROUTES.FACE_VERIFICATION);
+  const token = params?.token;
   const [isReady, setIsReady] = useState(false);
 
   // Fetch verification token info

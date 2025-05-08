@@ -122,7 +122,7 @@ export default function AuthForm({ type }: AuthFormProps) {
       // Check if verification email was sent
       // If verification was required, redirect to a verification notification page
       // Otherwise, go to discover page
-      if (result && result.verificationEmailSent) {
+      if (result && 'verificationEmailSent' in result && result.verificationEmailSent) {
         setLocation(ROUTES.VERIFY_NOTIFICATION);
       } else {
         setLocation(ROUTES.DISCOVER);

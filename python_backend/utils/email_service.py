@@ -33,7 +33,7 @@ def send_email(to_email, subject, text_content=None, html_content=None):
     try:
         # Send the email
         sg = SendGridAPIClient(SENDGRID_API_KEY)
-        response = sg.client.mail.send.post(request_body=message.get())
+        response = sg.send(message)
         
         return response.status_code >= 200 and response.status_code < 300
     except Exception as e:
@@ -47,7 +47,7 @@ def send_verification_email(email, first_name, verification_token):
     subject = "Verify Your Heartlink Account"
     
     # Create verification URL
-    verification_url = f"{APP_URL}/verify-face/{verification_token}"
+    verification_url = f"{APP_URL}/face-verification/{verification_token}"
     
     # Create email content
     html_content = f"""

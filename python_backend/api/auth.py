@@ -277,6 +277,49 @@ def verify_face():
         db.session.rollback()
         return jsonify({"error": "Verification failed", "details": str(e)}), 500
 
+@auth_bp.route('/resend-verification', methods=['POST'])
+def resend_verification():
+    """Resend verification email to the currently logged in user"""
+    # Check if the user is logged in
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"error": "Not authenticated"}), 401
+    
+    # Get user from database
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    # Check if user is already verified
+    if user.is_verified:
+        return jsonify({"error": "Account already verified"}), 400
+    
+    # Generate new verification token (expires in 24 hours)
+    verification_token = generate_token()
+    verification_token_expiry = datetime.utcnow() + timedelta(hours=24)
+    
+    # Update user with new token
+    user.verification_token = verification_token
+    user.verification_token_expiry = verification_token_expiry
+    
+    try:
+        db.session.commit()
+        
+        # Send verification email
+        email_sent = send_verification_email(
+            user.email,
+            user.first_name,
+            verification_token
+        )
+        
+        if email_sent:
+            return jsonify({"message": "Verification email sent successfully"}), 200
+        else:
+            return jsonify({"error": "Failed to send verification email"}), 500
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Failed to generate verification token", "details": str(e)}), 500
+
 @auth_bp.route('/verification/<token>', methods=['GET'])
 def get_verification_token(token):
     """Get information about a verification token"""

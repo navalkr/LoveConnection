@@ -1,0 +1,26 @@
+run = "cd python_backend && python run.py"
+entrypoint = "python_backend/app.py"
+
+[env]
+PYTHONPATH = "${PYTHONPATH}:${REPL_HOME}/python_backend"
+FLASK_APP = "app.py"
+FLASK_ENV = "development"
+APP_URL = "https://${REPL_SLUG}.${REPL_OWNER}.repl.co"
+
+[nix]
+channel = "stable-22_11"
+
+[packager]
+language = "python3"
+
+[packager.features]
+packageSearch = true
+guessImports = true
+enabledForHosting = false
+
+[languages.python3]
+pattern = "**/*.py"
+syntax = "python"
+
+[languages.python3.languageServer]
+start = ["pylsp"]

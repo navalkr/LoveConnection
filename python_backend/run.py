@@ -1,6 +1,6 @@
-from app import create_app
+from python_backend.app import create_app
 import os
-from models.db import db
+from python_backend.models.db import db
 
 app = create_app()
 

@@ -5,7 +5,7 @@ import { User, InsertUser, Login } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
 interface AuthState {
-  user: User | null;
+  user: User | null | undefined;
   isLoading: boolean;
   isAuthenticated: boolean;
   register: (data: InsertUser) => Promise<void>;
@@ -22,7 +22,7 @@ export function useAuth(): AuthState {
     data: user,
     isLoading,
     error
-  } = useQuery<User | null>({
+  } = useQuery<User | null | undefined>({
     queryKey: [API_ENDPOINTS.AUTH.ME],
     // We're using the default queryFn defined in queryClient.ts
     staleTime: 1000 * 60 * 10, // 10 minutes
@@ -60,10 +60,20 @@ export function useAuth(): AuthState {
     },
     onSuccess: (data) => {
       queryClient.setQueryData([API_ENDPOINTS.AUTH.ME], data);
-      toast({
-        title: "Account created!",
-        description: "Welcome to Heartlink!",
-      });
+      
+      // Check if verification email was sent
+      if (data.verificationEmailSent) {
+        toast({
+          title: "Account created!",
+          description: "Please check your email to verify your identity.",
+          duration: 6000,
+        });
+      } else {
+        toast({
+          title: "Account created!",
+          description: "Welcome to Heartlink!",
+        });
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -78,6 +88,19 @@ export function useAuth(): AuthState {
   const loginMutation = useMutation({
     mutationFn: async (credentials: Login) => {
       const res = await apiRequest("POST", API_ENDPOINTS.AUTH.LOGIN, credentials);
+      
+      // Check for verification status-specific response
+      if (res.status === 403) {
+        const data = await res.json();
+        if (data.message === "Account not verified") {
+          throw new Error(`VERIFICATION_REQUIRED:${data.email}`);
+        }
+      }
+      
+      if (!res.ok) {
+        throw new Error("Invalid username or password");
+      }
+      
       return res.json();
     },
     onSuccess: (data) => {
@@ -88,6 +111,17 @@ export function useAuth(): AuthState {
       });
     },
     onError: (error: Error) => {
+      // Check if error is verification required
+      if (error.message.startsWith("VERIFICATION_REQUIRED:")) {
+        const email = error.message.split(":")[1];
+        toast({
+          title: "Verification Required",
+          description: `Please check your email (${email}) for a verification link.`,
+          variant: "default",
+        });
+        return;
+      }
+      
       toast({
         title: "Login failed",
         description: error.message,

@@ -71,6 +71,10 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   verificationToken: true,
   verificationTokenExpiry: true,
+}).extend({
+  // Workaround for TypeScript compatibility
+  verificationToken: z.string().nullable().optional(),
+  verificationTokenExpiry: z.date().nullable().optional(),
 });
 
 export const insertProfileSchema = createInsertSchema(profiles).omit({

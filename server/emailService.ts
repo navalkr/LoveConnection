@@ -1,10 +1,11 @@
 import sgMail from '@sendgrid/mail';
 
+// Check if API key exists, but don't throw an error if missing
 if (!process.env.SENDGRID_API_KEY) {
-  console.error("SENDGRID_API_KEY environment variable is not set");
+  console.warn("SENDGRID_API_KEY environment variable is not set - email functionality will be limited");
+} else {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 }
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 
 interface EmailParams {
   to: string;
@@ -15,6 +16,16 @@ interface EmailParams {
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
+    // If SENDGRID_API_KEY isn't set, log the email content for development
+    if (!process.env.SENDGRID_API_KEY) {
+      console.log('=== DEVELOPMENT EMAIL ===');
+      console.log(`To: ${params.to}`);
+      console.log(`Subject: ${params.subject}`);
+      console.log('Content:', params.html || params.text || 'No content');
+      console.log('========================');
+      return true; // Return success in development mode
+    }
+    
     const msg = {
       to: params.to,
       from: 'info@heartlink.com', // Use your verified sender

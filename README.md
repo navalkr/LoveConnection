@@ -1,126 +1,89 @@
-# Heartlink Dating App
+# Heartlink - Modern Dating Platform
 
-A modern, feature-rich dating platform that leverages advanced matching algorithms and user-centric design to create meaningful connections.
+Heartlink is a sophisticated dating platform leveraging intelligent matching technologies and a comprehensive user experience design. The application is built with a focus on security, user verification, and intelligent matching based on user preferences and behavior patterns.
 
 ## Features
 
-- **User Authentication**
-  - Email registration/login
-  - Phone number recovery
-  - Face recognition verification
-  - Email verification flow
+- **Advanced User Matching**: Algorithm based on user preferences, location, and behavior patterns
+- **Comprehensive Authentication System**: Secure login, registration with email verification
+- **Face Verification**: Additional security layer through facial recognition
+- **Real-time Messaging**: Chat with your matches in real-time
+- **Detailed User Profiles**: Share your interests, location, and profession
+- **Discovery System**: Find potential matches based on your preferences
 
-- **Advanced Matching Algorithm**
-  - Interest-based matching
-  - Location-aware recommendations
-  - Profession compatibility
-  - User behavior tracking for better matches
+## Technology Stack
 
-- **Comprehensive User Profiles**
-  - Photo upload
-  - Detailed bio information
-  - Interest tagging
-  - Location services
-
-- **Real-Time Communication**
-  - Instant messaging
-  - Typing indicators
-  - Real-time notifications
-
-- **Security Features**
-  - Face verification for identity confirmation
-  - Email verification process
-  - Secure data handling
-
-## Tech Stack
-
-### Frontend
-- React
-- TypeScript
-- TailwindCSS
-- Shadcn/UI Components
-- React Query for data fetching
-- Vite for development
-
-### Backend
-- Python/Flask
-- PostgreSQL
-- SQLAlchemy ORM
-- SendGrid for emails
-- RESTful API architecture
+- **Frontend**: React / TypeScript with Tailwind CSS and shadcn/ui components
+- **Backend**: Node.js/Express API
+- **Database**: PostgreSQL with Drizzle ORM
+- **Email Services**: SendGrid for verification and notifications
+- **Session Management**: Express sessions with secure cookies
+- **Form Management**: React Hook Form with Zod validation
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js (v18 or newer)
-- Python 3.10+
-- PostgreSQL (optional, can use in-memory storage for development)
+
+- Node.js v16+
+- npm or yarn
+- PostgreSQL database (optional for production)
 
 ### Installation
 
 1. Clone the repository
-```
-git clone https://github.com/yourusername/heartlink.git
-cd heartlink
-```
+   ```
+   git clone https://github.com/navalkr/LoveConnection.git
+   cd LoveConnection
+   ```
 
-2. Install backend dependencies
-```
-cd python_backend
-pip install -r requirements.txt
-```
+2. Install dependencies
+   ```
+   npm install
+   ```
 
-3. Install frontend dependencies
-```
-cd ../client
-npm install
-```
+3. Set up environment variables
+   Create a `.env` file in the root directory with the following variables:
+   ```
+   SESSION_SECRET=your_secret_key
+   SENDGRID_API_KEY=your_sendgrid_api_key
+   APP_URL=http://localhost:5000
+   ```
 
-4. Configure environment variables
-```
-# Create .env file with the following variables
-SENDGRID_API_KEY=your_sendgrid_api_key
-APP_URL=http://localhost:5000
-```
-
-5. Start the application
-```
-npm run dev
-```
+4. Start the development server
+   ```
+   npm run dev
+   ```
 
 ## Project Structure
 
-- `/client` - Frontend React application
-- `/server` - Node.js Express server (deprecated)
-- `/python_backend` - Flask Python backend
-- `/shared` - Shared type definitions and schemas
+- `/client` - React frontend code
+  - `/src/components` - Reusable UI components
+  - `/src/hooks` - Custom React hooks
+  - `/src/pages` - Main application pages
+  - `/src/lib` - Utility functions and configuration
 
-## API Endpoints
+- `/server` - Express API backend
+  - `/auth.ts` - Authentication logic
+  - `/routes.ts` - API routes
+  - `/storage.ts` - Data storage interface
+  - `/emailService.ts` - Email functionality
 
-### Authentication
-- `POST /api/auth/register` - Create a new user account
-- `POST /api/auth/login` - Login to existing account
-- `POST /api/auth/logout` - Logout current user
-- `GET /api/auth/me` - Get current user info
-- `POST /api/auth/forgot-password` - Request password reset
-- `POST /api/auth/reset-password` - Reset password with token
-- `POST /api/auth/forgot-username` - Recover username
-- `POST /api/auth/verify-face` - Verify user's identity with face recognition
-- `POST /api/auth/resend-verification` - Resend verification email
+- `/shared` - Code shared between frontend and backend
+  - `/schema.ts` - Database schema and type definitions
 
-### Profiles
-- `GET /api/profile` - Get current user's profile
-- `PUT /api/profile` - Update user's profile
+## Contributing
 
-### Matching
-- `GET /api/discover` - Get profiles for discovery
-- `GET /api/matches` - Get user's matches
-- `GET /api/matches/:matchId/messages` - Get messages for a match
-- `POST /api/matches/:matchId/messages` - Send a message in a match
-
-### Behavior Tracking
-- `POST /api/behavior` - Track user behavior for recommendations
-- `GET /api/behavior/stats` - Get behavioral statistics
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
-MIT
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Special thanks to the React and Express communities
+- All the open-source libraries that made this project possible

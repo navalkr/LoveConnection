@@ -16,15 +16,16 @@ import {
 const createMemoryStore = MemoryStore(session);
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Set up session middleware
+  // Set up session middleware with improved configuration
   app.use(
     session({
       secret: process.env.SESSION_SECRET || "heartlink-secret-key",
       resave: false,
       saveUninitialized: false,
       cookie: { 
-        secure: process.env.NODE_ENV === "production",
+        secure: false, // Set to false for development
         maxAge: 1000 * 60 * 60 * 24, // 1 day
+        sameSite: 'lax'
       },
       store: new createMemoryStore({
         checkPeriod: 86400000, // 24 hours

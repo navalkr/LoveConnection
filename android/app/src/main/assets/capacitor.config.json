@@ -1,0 +1,9 @@
+{
+	"appId": "com.heartlink.app",
+	"appName": "Heartlink",
+	"webDir": "dist/public",
+	"server": {
+		"androidScheme": "https"
+	},
+	"plugins": {}
+}
